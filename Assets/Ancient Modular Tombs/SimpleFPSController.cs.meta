@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: bb257caca80f8ea4887eb9ee13cfa995
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 69718
+  packageName: Egyptian Tombs with Pyramid
+  packageVersion: 2.2
+  assetPath: Assets/Ancient Modular Tombs/SimpleFPSController.cs
+  uploadId: 945710

@@ -1,0 +1,9 @@
+BRACOS EM PRIMEIRA PESSOA
+=========================
+1. Coloque nesta pasta o arquivo baixado do Sketchfab (.fbx ou .glb) e as texturas dele.
+2. Volte ao Unity e espere importar.
+3. Menu:  Rift Of Time > 4. Instalar bracos (Assets/Characters/Arms)
+   Isso configura o rig, cria o Animator com o estado "Attack", converte os materiais para URP
+   e coloca o filho "Arms" na camera do Player em todas as cenas.
+4. De Play e clique com o botao esquerdo para atacar.
+Ajustes finos: selecione "Arms" na camera do Player e mexa em Position/Rotation/Scale.

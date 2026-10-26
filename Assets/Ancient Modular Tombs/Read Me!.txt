@@ -1,0 +1,49 @@
+# Asset Setup Guide: Post-Processing & URP Configuration
+
+Thank you for purchasing this asset! This package comes with pre-configured, high-fidelity visual profiles to deliver a clean cinematic look out of the box. 
+
+All configuration assets are located in the `/Profiles` directory. Follow this quick guide to apply them to your scene.
+
+---
+
+## 1. Apply the Pre-Configured URP Asset
+
+To ensure all custom rendering settings, textures, and capabilities match the intended design, you need to activate the included URP configuration.
+
+1. Go to **Edit -> Project Settings -> Graphics**.
+2. Locate the **Scriptable Render Pipeline Settings** field at the top.
+3. Drag and drop the **Universal Render Pipeline Asset** from your `/Profiles` folder into this field.
+
+---
+
+## 2. Setup Post-Processing & Camera
+
+Your scene camera needs to be configured to process the cinematic effects.
+
+1. Select your **Main Camera** in the Hierarchy.
+2. In the Inspector, navigate to the **Camera** component.
+3. Under the **Rendering** section, make sure the **Post Processing** checkbox is **checked**.
+4. *(Highly Recommended)* Set **Anti-aliasing** to **Temporal Anti-aliasing (TAA)** to eliminate pixel flickering on fine interior details and geometry.
+
+---
+
+## 3. Activate the Global Volume Profile
+
+We have already tuned the Tonemapping (ACES), Bloom, and Color Adjustments for you inside the `PostFX Profile`.
+
+1. Right-click in your Hierarchy window and select **Volume -> Global Volume**.
+2. Select the newly created `Global Volume` GameObject.
+3. In the Inspector, ensure its **Mode** is set to **Global**.
+4. Drag and drop the **PostFX Profile** asset from `/Profiles` directly into the **Profile** slot of the Volume component.
+
+---
+
+## Troubleshooting
+
+* **The screen remains blank or effects don't apply?**
+  Ensure the **Layer** of your `Global Volume` object (found at the very top of the Inspector) is set to **Default**. Your Main Camera's *Volume Mask* is set to look for the *Default* layer by default.
+* **Are you experiencing grainy lightmaps?**
+  If you decide to re-bake lighting for this interior scene, go to *Window -> Rendering -> Lighting* and ensure **Compress Lightmaps** is turned **Off** for pristine, artifact-free baking results.
+
+---
+*For further support or custom inquiries, feel free to reach out via the publisher contact page.*

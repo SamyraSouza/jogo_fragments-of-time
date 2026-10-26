@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ac28934de8dc261419482fbf74635e38
+timeCreated: 1474825900
+licenseType: Store
+NativeFormatImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 69718
+  packageName: Egyptian Tombs with Pyramid
+  packageVersion: 2.2
+  assetPath: Assets/Ancient Modular Tombs/Prefabs/Floor_Trap_with_spikes_off.prefab
+  uploadId: 945710

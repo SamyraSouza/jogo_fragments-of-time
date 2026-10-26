@@ -1,0 +1,19 @@
+fileFormatVersion: 2
+guid: 1710071e47f207047873b66de4897107
+timeCreated: 1452688373
+licenseType: Store
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 69718
+  packageName: Egyptian Tombs with Pyramid
+  packageVersion: 2.2
+  assetPath: Assets/Ancient Modular Tombs/Scripts/Trap_script.cs
+  uploadId: 945710
