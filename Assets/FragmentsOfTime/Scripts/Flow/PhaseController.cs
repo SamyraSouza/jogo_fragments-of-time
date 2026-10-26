@@ -12,6 +12,9 @@ namespace RiftOfTime
     /// <summary>Orquestra uma fase de jogo (telas 02 a 05 do storyboard): prepara o jogador, o HUD, o áudio e</summary>
     public class PhaseController : MonoBehaviour
     {
+        /// <summary>Chave (EditorPrefs, guardada por máquina, não no projeto) do atalho de teste "pular para a porta da câmara da Fase 2". Menu: Rift Of Time ▸ Teste.</summary>
+        public const string TestKeyFase2AtDoor = "RoT_Fase2NaPorta";
+
         public PhaseKind phase;
 
         [Header("Referências da cena")]
@@ -52,10 +55,10 @@ namespace RiftOfTime
             hud.MenuRequested += () => { SetPaused(false); gm.ToMenu(); };
 
 #if UNITY_EDITOR
-            // teste: com a opção ligada, a Fase 1 pula direto para a Fase 2 (que já começa na porta da câmara)
-            if (phase == PhaseKind.Fase1 && UnityEditor.EditorPrefs.GetBool("RoT_Fase2NaPorta", true))
+            // teste (desligado por padrão): com a opção ligada, a Fase 1 pula direto para a Fase 2 (que já começa na porta da câmara)
+            if (phase == PhaseKind.Fase1 && UnityEditor.EditorPrefs.GetBool(TestKeyFase2AtDoor, false))
             {
-                gm.GoTo(SceneNames.Fase2, Color.black);
+                StartCoroutine(SkipToFase2());
                 return;
             }
 #endif
@@ -153,6 +156,13 @@ namespace RiftOfTime
         }
 
 #if UNITY_EDITOR
+        IEnumerator SkipToFase2()
+        {
+            // a troca de cena que nos trouxe até aqui ainda está no fade de entrada, e GoTo ignora pedidos nesse período
+            while (gm.IsLoading) yield return null;
+            gm.GoTo(SceneNames.Fase2, Color.black);
+        }
+
         IEnumerator StartAtDoorInEditor()
         {
             yield return null;
@@ -527,7 +537,7 @@ namespace RiftOfTime
             RenderSettings.fogColor = Color.black;
             RenderSettings.fogDensity = 0.035f;
             foreach (Light l in FindObjectsByType<Light>(FindObjectsSortMode.None))
-                if (l.type == LightType.Directional) l.intensity *= 0.06f;
+                if (l.type == LightType.Directional) { l.intensity *= 0.06f; l.shadows = LightShadows.None; }     // a 6% de intensidade a sombra do sol não aparece, só custa
             Camera cam = playerT != null ? playerT.GetComponentInChildren<Camera>() : null;
             if (cam != null) { cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = Color.black; }
         }
@@ -571,7 +581,7 @@ namespace RiftOfTime
         {
             PinkGuard.Fix("fase 2");
 #if UNITY_EDITOR
-            if (UnityEditor.EditorPrefs.GetBool("RoT_Fase2NaPorta", true)) StartCoroutine(StartAtDoorInEditor());
+            if (UnityEditor.EditorPrefs.GetBool(TestKeyFase2AtDoor, false)) StartCoroutine(StartAtDoorInEditor());
 #endif
             DarkenScene();
             EnsureWallMeshColliders();

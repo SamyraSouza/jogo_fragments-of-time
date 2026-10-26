@@ -17,8 +17,10 @@ namespace RiftOfTime
         Animator anim;
         Transform head, hip;
         Quaternion headFix = Quaternion.identity;
-        Light beam;
-        float nextBeamSearch, scaredUntil, nextTwitch, twitchUntil, shuffleUntil;
+        // a lanterna é uma só: todas as baratas dividem a luz achada e a busca (eram 152 baratas varrendo todas as luzes da cena a cada segundo)
+        static Light beam;
+        static float nextBeamSearch;
+        float scaredUntil, nextTwitch, twitchUntil, shuffleUntil;
         Vector3 dir;
 
         void Awake()

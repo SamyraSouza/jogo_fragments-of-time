@@ -82,16 +82,14 @@ namespace RiftOfTime.EditorTools
             foreach (var l in model.GetComponentsInChildren<Light>(true)) l.enabled = false;
             foreach (var ps in model.GetComponentsInChildren<ParticleSystem>(true)) ps.gameObject.SetActive(false);
 
-            // apoia no chão (base levemente enterrada) e cria um colisor de caixa do tamanho do modelo
-            // apoia no chão: só conta o que é sólido (ignora brilhos/transparentes, que ficam abaixo da base e a faziam flutuar)
+            // a origem do modelo é a placa-base da máquina (a metade de baixo do anel desce abaixo dela, enterrada no chão, como no Prólogo):
+            // a raiz fica na altura do chão. Apoiar o ponto mais baixo do anel no chão deixava a placa-base ~1,5 m no ar, a máquina flutuando.
+            // Aqui só se cria um colisor de caixa do tamanho do modelo (só o que é sólido: ignora brilhos/transparentes).
             var rends = model.GetComponentsInChildren<Renderer>().Where(r => r.gameObject.activeInHierarchy && !(r is ParticleSystemRenderer)).ToArray();
             var solid = rends.Where(r => r.sharedMaterial != null && r.sharedMaterial.renderQueue < 3000 && r.bounds.size.y > 0.03f).ToArray();
             if (solid.Length == 0) solid = rends;
             if (rends.Length > 0)
             {
-                float minY = solid.Min(r => r.bounds.min.y);
-                root.transform.position += Vector3.up * (pos.y - minY - 0.02f);
-
                 Bounds bb = solid[0].bounds;
                 foreach (var r in solid) bb.Encapsulate(r.bounds);
                 var box = root.AddComponent<BoxCollider>();

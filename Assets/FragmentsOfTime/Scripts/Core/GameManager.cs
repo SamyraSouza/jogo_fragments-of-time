@@ -38,6 +38,9 @@ namespace RiftOfTime
 
         bool loading;
 
+        /// <summary>Verdadeiro enquanto uma troca de cena está em andamento (inclusive o fade de entrada da cena nova): GoTo ignora pedidos nesse período.</summary>
+        public bool IsLoading { get { return loading; } }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void ResetStatics() { Instance = null; Epilogue = false; }
 
