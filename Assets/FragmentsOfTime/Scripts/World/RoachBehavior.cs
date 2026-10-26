@@ -26,6 +26,7 @@ namespace RiftOfTime
         void Awake()
         {
             anim = GetComponentInChildren<Animator>();
+            if (anim != null) anim.cullingMode = AnimatorCullingMode.CullCompletely;     // 152 baratas no Prólogo: fora da tela não animam
             foreach (Transform t in GetComponentsInChildren<Transform>(true))
             {
                 string n = t.name.ToLower();
@@ -57,17 +58,10 @@ namespace RiftOfTime
             if ((beam == null || !beam.enabled) && Time.time >= nextBeamSearch)
             {
                 nextBeamSearch = Time.time + 1f;
-                var found = new System.Text.StringBuilder();
                 foreach (Light l in FindObjectsByType<Light>(FindObjectsInactive.Include))
                 {
                     if (!l.name.ToLower().Contains("flashlight")) continue;
-                    found.Append("'" + l.name + "' (ligada=" + l.enabled + ") ");
                     if (beam == null || (l.enabled && !beam.enabled)) beam = l;
-                }
-                if (!loggedSearch)
-                {
-                    loggedSearch = true;
-                    Debug.Log("[Barata] luz da lanterna: " + (beam != null ? found.ToString() + "-> usando '" + beam.name + "' em " + beam.transform.root.name + "/…/" + beam.name + ", alcance " + beam.range + ", ângulo " + beam.spotAngle : "NÃO ACHEI nenhuma luz com 'flashlight' no nome"));
                 }
             }
 
@@ -82,21 +76,9 @@ namespace RiftOfTime
             else Idle();
         }
 
-        static float nextDebug;
-        static bool loggedSearch;
-        static float nextStateLog;
-
         bool IsLit()
         {
-            if (beam == null || !beam.enabled || !beam.gameObject.activeInHierarchy)
-            {
-                if (Time.time >= nextStateLog)
-                {
-                    nextStateLog = Time.time + 6f;
-                    Debug.Log("[Barata] luz fora do jogo: " + (beam == null ? "não encontrada" : "ligada=" + beam.enabled + ", objeto ativo=" + beam.gameObject.activeInHierarchy));
-                }
-                return false;
-            }
+            if (beam == null || !beam.enabled || !beam.gameObject.activeInHierarchy) return false;
             Vector3 p = transform.position + Vector3.up * 0.02f;
             Camera cam = Camera.main;
 
@@ -111,19 +93,11 @@ namespace RiftOfTime
             }
 
             bool inAim = false;
-            float dC = 0f, angC = 999f;
             if (cam != null)
             {
                 Vector3 toC = p - cam.transform.position;
-                dC = toC.magnitude;
-                angC = Vector3.Angle(cam.transform.forward, toC);
-                inAim = dC <= range && angC <= 20f && Clear(cam.transform.position, toC, dC);
-            }
-
-            if (Time.time >= nextDebug && cam != null && dC < 16f)
-            {
-                nextDebug = Time.time + 2f;
-                Debug.Log("[Barata] luz ligada, a " + dC.ToString("F1") + " m, " + angC.ToString("F0") + "° do centro da tela; no feixe=" + inBeam + ", na mira=" + inAim + " -> " + (inBeam || inAim ? "FOGE" : "parada"));
+                float dC = toC.magnitude;
+                inAim = dC <= range && Vector3.Angle(cam.transform.forward, toC) <= 20f && Clear(cam.transform.position, toC, dC);
             }
             return inBeam || inAim;
         }

@@ -557,9 +557,6 @@ namespace RiftOfTime
                     f.bones[i].localRotation = Quaternion.AngleAxis(f.angle[i] * 0.12f * talkEnergySm * g * f.holdSign, f.axisLocal[i]) * f.bones[i].localRotation;
         }
 
-        /// <summary>Volume da fala (0..1): o braço se mexe junto com o ritmo da voz.</summary>
-        public void SetTalkEnergy(float e) { talkEnergy = Mathf.Clamp01(e); }
-
         void ComputeTalkPose(Hand left, Camera cam, Renderer body)
         {
             Transform arm = left.arm;
@@ -635,8 +632,6 @@ namespace RiftOfTime
             for (int i = 1; i < rends.Length; i++) b.Encapsulate(rends[i].bounds);
             return b;
         }
-
-        static Vector3 CenterOf(Renderer[] rends) { return CenterBounds(rends).center; }
 
         float TipDistance(Finger f, Vector3 target, float sign)
         {

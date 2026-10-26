@@ -153,15 +153,5 @@ namespace RiftOfTime
             src.PlayOneShot(steps[pick], volume * Mathf.Lerp(0.6f, 1f, amount) * Random.Range(0.85f, 1f));
         }
 
-        bool Grounded()
-        {
-            Vector3 o = player.position + Vector3.up * 0.3f;
-            foreach (RaycastHit h in Physics.RaycastAll(o, Vector3.down, groundRay, ~0, QueryTriggerInteraction.Ignore))
-            {
-                if (h.transform.IsChildOf(player) || h.normal.y < 0.5f) continue;
-                return true;
-            }
-            return false;
-        }
     }
 }

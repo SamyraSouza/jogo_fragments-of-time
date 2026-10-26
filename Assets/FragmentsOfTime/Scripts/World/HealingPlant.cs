@@ -195,11 +195,20 @@ namespace RiftOfTime
     /// <summary>Guarda as plantas coletadas; [H] usa uma e recupera parte da vida.</summary>
     public class PlantUser : MonoBehaviour
     {
-        public static int Count;
+        static int count;
         static PlantUser inst;
 
+        /// <summary>Quantidade de plantas guardadas; o HUD acompanha pelo evento.</summary>
+        public static int Count
+        {
+            get { return count; }
+            set { count = value; if (CountChanged != null) CountChanged(count); }
+        }
+
+        public static event System.Action<int> CountChanged;
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Reset() { Count = 0; inst = null; }
+        static void Reset() { count = 0; inst = null; CountChanged = null; }
 
         public static void Ensure()
         {

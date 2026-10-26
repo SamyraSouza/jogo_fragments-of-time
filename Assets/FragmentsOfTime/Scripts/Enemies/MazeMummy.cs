@@ -727,34 +727,6 @@ namespace RiftOfTime
         }
 
         // o pé já está no chão: inclina o corpo em torno dele até a cabeça também descer ao chão
-        void LevelLengthwise()
-        {
-            Transform l, r, hd, fl, fr;
-            if (!myBones.TryGetValue("mixamorig:LeftShoulder", out l) || !myBones.TryGetValue("mixamorig:RightShoulder", out r) ||
-                !myBones.TryGetValue("mixamorig:Head", out hd) || !myBones.TryGetValue("mixamorig:LeftFoot", out fl) ||
-                !myBones.TryGetValue("mixamorig:RightFoot", out fr)) return;
-            Transform foot = fl.position.y < fr.position.y ? fl : fr;
-            Vector3 axis = r.position - l.position; axis.y = 0f;
-            if (axis.sqrMagnitude < 0.01f) return;
-            axis.Normalize();
-            Vector3 v = hd.position - foot.position;
-            if (Mathf.Abs(v.y) > v.magnitude * 0.7f) return;      // em pé / ajoelhada: não mexe
-            float low = float.PositiveInfinity;
-            foreach (var kv in myBones)
-                low = Mathf.Min(low, kv.Value.position.y - Margin(kv.Key));
-            float dy = hd.position.y - Margin("mixamorig:Head") - low;
-            if (dy < 0.02f) return;
-            float dh = Mathf.Max(new Vector2(v.x, v.z).magnitude, 0.5f);
-            float a = Mathf.Clamp(Mathf.Asin(Mathf.Clamp01(dy / dh)) * Mathf.Rad2Deg, 0f, 40f);
-            Quaternion keep = visual.rotation; Vector3 keepPos = visual.position;
-            float before = hd.position.y;
-            visual.RotateAround(foot.position, axis, a);
-            if (hd.position.y > before)
-            {
-                visual.rotation = keep; visual.position = keepPos;
-                visual.RotateAround(foot.position, axis, -a);
-            }
-        }
 
         // quanto a carne se estende abaixo do osso, por parte do corpo (margem MAIOR = corpo mais ALTO: o chão é o osso menos a margem)
         float Margin(string bone)
@@ -767,19 +739,6 @@ namespace RiftOfTime
         Mesh bakeMesh;
 
         // o vértice mais baixo da malha já deformada pelo esqueleto (cabeça, mãos, tudo)
-        float LowestVertex()
-        {
-            float low = float.PositiveInfinity;
-            if (bakeMesh == null) bakeMesh = new Mesh();
-            foreach (SkinnedMeshRenderer smr in visual.GetComponentsInChildren<SkinnedMeshRenderer>())
-            {
-                if (!smr.enabled) continue;
-                smr.BakeMesh(bakeMesh, true);
-                Matrix4x4 m = Matrix4x4.TRS(smr.transform.position, smr.transform.rotation, Vector3.one);
-                foreach (Vector3 v in bakeMesh.vertices) low = Mathf.Min(low, m.MultiplyPoint3x4(v).y);
-            }
-            return low;
-        }
 
         // o corpo bate no chão
         IEnumerator Thud(float delay)

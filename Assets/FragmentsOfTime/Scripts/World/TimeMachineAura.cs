@@ -55,7 +55,7 @@ namespace RiftOfTime
         Light pointGlow;
         SpriteRenderer glowCore, glowHalo;
         ParticleSystem sparks, dust;
-        float nextSfx, nextLog;
+        float nextSfx;
         AudioSource hum;
         Material spriteMat;
         Texture2D beamTex, dotTex;
@@ -347,8 +347,6 @@ namespace RiftOfTime
             kv = dist > farDistance
                 ? shakeAtFar * Mathf.Clamp01(Mathf.InverseLerp(shakeStartDistance, farDistance, dist))
                 : Mathf.Lerp(shakeAtFar, 1f, k);
-            if (Time.time >= nextLog) { nextLog = Time.time + 3f; Debug.Log("[Aura] distância " + d.magnitude.ToString("F1") + " m -> intensidade " + k.ToString("F2")); }
-
             CameraSway.Stress = kv;
             if (driveCamera && d.magnitude > triggerDistance + 0.2f) CameraShake.Hold(cameraShake * kv);
 

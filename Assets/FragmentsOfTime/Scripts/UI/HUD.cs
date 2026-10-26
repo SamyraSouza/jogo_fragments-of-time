@@ -24,6 +24,7 @@ namespace RiftOfTime
         Text objectiveText;
         Text fragText, timerText, bannerText, subtitleText, promptText, messageText, bossName, readTitle, readBody;
         RectTransform healthFill, bossFill;
+        StatusPanel status;
         Image timerFill;
         float timerMax;
         GameObject timerPanel, bossRoot, readPanel, pausePanel;
@@ -61,8 +62,11 @@ namespace RiftOfTime
         void OnDestroy()
         {
             if (Instance == this) Instance = null;
+            PlantUser.CountChanged -= OnPlantsChanged;
             if (lowVolume != null) Destroy(lowVolume.gameObject);
         }
+
+        void OnPlantsChanged(int n) { if (status != null) status.SetPlants(n); }
 
         static readonly Color Cream = new Color(1f, 0.88f, 0.65f);
         static readonly Color Dark = new Color(0f, 0f, 0f, 0.55f);
@@ -94,7 +98,13 @@ namespace RiftOfTime
             Image fill = UIFactory.CreateImage(inner, new Color(0.4f, 0.44f, 0.12f), "Fill");
             healthFill = fill.rectTransform;
             UIFactory.SetAnchors(healthFill, Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero);
-            bar.gameObject.SetActive(false);            // sem a barra de vida na tela
+            bar.gameObject.SetActive(false);            // sem a barra vertical antiga; a vida aparece no painel de status abaixo
+
+            // vida e plantas curadoras (escondido até a fase pedir: o Prólogo não mostra)
+            status = StatusPanel.Create(g);
+            status.SetPlants(PlantUser.Count);
+            PlantUser.CountChanged += OnPlantsChanged;
+            status.gameObject.SetActive(false);
 
             // contagem do colapso: só um círculo vinho no canto direito que se esvazia
             RectTransform tp = UIFactory.CreateRect("TimerPanel", g);
@@ -233,10 +243,14 @@ namespace RiftOfTime
             bool lost = t01 < health01 - 0.001f;
             health01 = t01;
             healthFill.anchorMax = new Vector2(1f, t01);
+            if (status != null) status.SetHealth(t01);
             if (pendingHit && lost && t01 <= SplatterBelow) SpawnSplatters(t01);
             pendingHit = false;
             UpdateLowHealth();
         }
+
+        /// <summary>Mostra ou esconde o painel de vida e plantas curadoras (as fases ligam; o Prólogo não tem).</summary>
+        public void ShowStatus(bool show) { if (status != null) status.gameObject.SetActive(show); }
 
         /// <summary>Levou um golpe. Só mostra sangue na tela se a vida ficar baixa (decidido em SetHealth).</summary>
         public void FlashDamage() { pendingHit = true; }

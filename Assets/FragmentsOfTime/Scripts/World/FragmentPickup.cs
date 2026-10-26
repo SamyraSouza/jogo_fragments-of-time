@@ -30,17 +30,6 @@ namespace RiftOfTime
         const string GatePath = "Assets/Ancient Modular Tombs/Meshes/portal_gate_sci-fi.glb";
         string pieceNode = "Gsf_mat2-017_low001";     // peça mecânica da máquina (conector com haste)
 
-        /// <summary>Troca o visual por outra peça da máquina (só no Editor; sem o modelo, fica como está).</summary>
-        public void UseMachinePiece(string node)
-        {
-            pieceNode = node;
-            GameObject d = BuildPiece();
-            if (d == null) return;
-            if (visual != null) Destroy(visual.gameObject);
-            visual = d.transform;
-            basePos = visual.localPosition;
-        }
-
         /// <summary>Uma das peças quebradas da máquina do tempo (só no Editor, onde o modelo da máquina é carregado); null se não der.</summary>
         GameObject BuildPiece()
         {

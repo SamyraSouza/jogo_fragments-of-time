@@ -65,7 +65,6 @@ namespace RiftOfTime
             groundY = transform.position.y;
 
             Transform existing = transform.Find("Model");
-            if (existing == null && isPharaoh && PharaohVisual.Attach(gameObject, 1.9f * scale)) existing = transform.Find("Model");
             if (existing == null)
             {
                 rig = MummyBuilder.Build(transform, isPharaoh);

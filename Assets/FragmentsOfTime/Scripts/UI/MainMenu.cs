@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using UnityEngine.Video;
-using System.Collections;
 
 namespace RiftOfTime
 {
@@ -13,27 +12,16 @@ namespace RiftOfTime
 
         [Header("Vídeo de fundo (Assets/StreamingAssets)")]
         const string videoFile = "video-menu-pingpong.mp4";
-        public float skipAfter = 1.5f;
-
-        bool reversing, seeking;
-        float reverseFrom, reverseStartTime, seekSetAt;
 
         VideoPlayer vp;
         RawImage videoImage;
         RenderTexture videoRT;
-        AudioSource videoAudio;
-        bool videoReady, starting, videoEnded;
+        bool videoReady, starting;
         float videoW, videoH;
-        RectTransform darkening;
         Material glitchMat;
         float prepareStart;
 
-        Button startBtn, continueBtn, optionsBtn, quitBtn;
-        GameObject optionsPanel, mainGroup;
-        Text volumeText;
-        Camera cam;
-        Vector3 camBasePos;
-        Quaternion camBaseRot;
+        Button startBtn;
 
         void Start()
         {
@@ -44,13 +32,12 @@ namespace RiftOfTime
             MenuCursor.Set();
             UIFactory.EnsureEventSystem();
 
-            cam = Camera.main;
+            Camera cam = Camera.main;
             if (cam != null)
             {
                 cam.cullingMask = 0;
                 cam.clearFlags = CameraClearFlags.SolidColor;
                 cam.backgroundColor = Color.black;
-                camBasePos = cam.transform.position; camBaseRot = cam.transform.rotation;
             }
 
             HideOldBackground();
@@ -99,9 +86,6 @@ namespace RiftOfTime
 
             var go = new GameObject("VideoDeFundo");
             go.transform.SetParent(transform, false);
-            videoAudio = go.AddComponent<AudioSource>();
-            videoAudio.playOnAwake = false;
-            videoAudio.spatialBlend = 0f;
             vp = go.AddComponent<VideoPlayer>();
             vp.playOnAwake = false;
             vp.source = VideoSource.Url;
@@ -118,7 +102,6 @@ namespace RiftOfTime
                 videoReady = false;
                 if (videoImage != null) videoImage.gameObject.SetActive(false);
             };
-            vp.loopPointReached += v => videoEnded = true;
             prepareStart = Time.realtimeSinceStartup;
             vp.Prepare();
         }
@@ -178,54 +161,20 @@ namespace RiftOfTime
                 Shader sh = Shader.Find("RiftOfTime/TvGlitchUI");
                 if (sh != null) { glitchMat = new Material(sh); videoImage.material = glitchMat; }
 
-                darkening = HorrorTitleStyle.CreateDarkening(root, 1);
+                HorrorTitleStyle.CreateDarkening(root, 1);
             }
 
-            mainGroup = UIFactory.CreateRect("Main", root).gameObject;
+            GameObject mainGroup = UIFactory.CreateRect("Main", root).gameObject;
             UIFactory.Stretch(mainGroup.GetComponent<RectTransform>());
             Transform m = mainGroup.transform;
 
             HorrorTitleStyle.CreateTitle(m, "FRAGMENTS", "OF TIME");
             startBtn = HorrorTitleStyle.CreateEntry(m, "Iniciar Expedição", 32, OnStart, "Iniciar", 0.375f);
-            quitBtn = HorrorTitleStyle.CreateEntry(m, "Sair", 32, OnQuit, "Sair", 0.315f);
+            HorrorTitleStyle.CreateEntry(m, "Sair", 32, OnQuit, "Sair", 0.315f);
             HorrorTitleStyle.CreateCopyright(m, "©FRAGMENTS OF TIME. TODOS OS DIREITOS RESERVADOS.");
 
             if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(startBtn.gameObject);
         }
-
-        void BuildOptions(Transform root)
-        {
-            Image p = UIFactory.CreateImage(root, new Color(0.08f, 0.1f, 0.2f, 0.92f), "Options", true);
-            optionsPanel = p.gameObject;
-            UIFactory.Place(p.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(1000, 760));
-
-            Text t = UIFactory.CreateText(p.transform, "Opções", 80, new Color(0.99f, 0.84f, 0.62f), TextAnchor.MiddleCenter, FontStyle.Bold, "Title");
-            UIFactory.Place(t.rectTransform, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0, -30), new Vector2(900, 110));
-
-            volumeText = UIFactory.CreateText(p.transform, "", 44, Color.white, TextAnchor.MiddleCenter, FontStyle.Bold, "Volume");
-            UIFactory.Place(volumeText.rectTransform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 180), new Vector2(500, 80));
-            Button minus = UIFactory.CreateButton(p.transform, "-", new Vector2(110, 90), () => ChangeVolume(-0.1f), 56, "VolMinus");
-            UIFactory.Place(minus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-330, 180), new Vector2(110, 90));
-            Button plus = UIFactory.CreateButton(p.transform, "+", new Vector2(110, 90), () => ChangeVolume(0.1f), 56, "VolPlus");
-            UIFactory.Place(plus.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(330, 180), new Vector2(110, 90));
-
-            Button full = UIFactory.CreateButton(p.transform, "Tela cheia: alternar", new Vector2(640, 100), () => Screen.fullScreen = !Screen.fullScreen, 38, "Full");
-            UIFactory.Place(full.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0, 50), new Vector2(640, 100));
-
-            Button back = UIFactory.CreateButton(p.transform, "Voltar", new Vector2(420, 100), CloseOptions, 40, "Back");
-            UIFactory.Place(back.GetComponent<RectTransform>(), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0, 50), new Vector2(420, 100));
-
-            RefreshVolume();
-            optionsPanel.SetActive(false);
-        }
-
-        void ChangeVolume(float delta)
-        {
-            GameManager.MasterVolume = GameManager.MasterVolume + delta;
-            RefreshVolume();
-        }
-
-        void RefreshVolume() { volumeText.text = "Volume: " + Mathf.RoundToInt(GameManager.MasterVolume * 100f) + "%"; }
 
         void OnStart()
         {
@@ -239,40 +188,6 @@ namespace RiftOfTime
             GameManager.Ensure().NewGame();
         }
 
-        IEnumerator PlayIntroThenStart()
-        {
-            var cg = mainGroup.GetComponent<CanvasGroup>();
-            if (cg == null) cg = mainGroup.AddComponent<CanvasGroup>();
-            cg.interactable = false; cg.blocksRaycasts = false;
-            if (AudioDirector.Instance != null) { AudioDirector.Instance.StopLoop("ambient"); AudioDirector.Instance.StopLoop("wind"); }
-            Cursor.visible = false;
-            for (float t = 0f; t < 0.6f; t += Time.unscaledDeltaTime) { cg.alpha = 1f - t / 0.6f; yield return null; }
-            cg.alpha = 0f; mainGroup.SetActive(false);
-            if (darkening != null) darkening.gameObject.SetActive(false);
-
-            videoEnded = false;
-            if (reversing) { reversing = false; seeking = false; if (videoAudio != null) videoAudio.mute = false; }
-            vp.Play();
-            float started = Time.unscaledTime;
-            while (!videoEnded)
-            {
-                if (Time.unscaledTime - started > skipAfter && AnyInput()) break;
-                if (!vp.isPlaying && Time.unscaledTime - started > 1f && vp.time >= vp.length - 0.2f) break;
-                yield return null;
-            }
-            vp.Stop();
-            GameManager.Ensure().NewGame();
-        }
-
-        static bool AnyInput()
-        {
-            var kb = UnityEngine.InputSystem.Keyboard.current;
-            var ms = UnityEngine.InputSystem.Mouse.current;
-            return (kb != null && kb.anyKey.wasPressedThisFrame) || (ms != null && ms.leftButton.wasPressedThisFrame);
-        }
-
-        void OnContinue() { GameManager.Ensure().ContinueGame(); }
-
         void OnQuit()
         {
             if (vp != null) vp.Stop();
@@ -281,20 +196,6 @@ namespace RiftOfTime
 #else
             Application.Quit();
 #endif
-        }
-
-        void OnOptions()
-        {
-            mainGroup.SetActive(false);
-            optionsPanel.SetActive(true);
-            if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(optionsPanel.transform.Find("Back").gameObject);
-        }
-
-        void CloseOptions()
-        {
-            optionsPanel.SetActive(false);
-            mainGroup.SetActive(true);
-            if (EventSystem.current != null) EventSystem.current.SetSelectedGameObject(startBtn.gameObject);
         }
     }
 }

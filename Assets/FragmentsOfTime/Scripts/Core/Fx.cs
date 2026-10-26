@@ -133,33 +133,6 @@ namespace RiftOfTime
             return ps;
         }
 
-        /// <summary>Rastro de poeira atrás da pedra enquanto ela cai.</summary>
-        public static ParticleSystem FallTrail(Transform follow)
-        {
-            ParticleSystem ps = NewSystem("RastroDaPedra", follow.position, follow);
-            var main = ps.main;
-            main.loop = true;
-            main.playOnAwake = false;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startLifetime = new ParticleSystem.MinMaxCurve(0.5f, 0.9f);
-            main.startSpeed = new ParticleSystem.MinMaxCurve(0f, 0.6f);
-            main.startSize = new ParticleSystem.MinMaxCurve(0.25f, 0.6f);
-            main.maxParticles = 200;
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Sphere;
-            shape.radius = 0.35f;
-            var em = ps.emission;
-            em.rateOverTime = 70f;
-            var sz = ps.sizeOverLifetime;
-            sz.enabled = true;
-            sz.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(new Keyframe(0f, 0.5f), new Keyframe(1f, 1.5f)));
-            var col = ps.colorOverLifetime;
-            col.enabled = true;
-            col.color = FadeOut(new Color(0.7f, 0.62f, 0.5f), 0.55f);
-            ps.Play();
-            return ps;
-        }
-
         /// <summary>Nuvem de poeira que se abre em anel no chão, mais fagulhas laranja do impacto.</summary>
         public static void ImpactDust(Vector3 ground, float radius)
         {
@@ -224,55 +197,6 @@ namespace RiftOfTime
             scol.color = g;
             sp.Play();
             Object.Destroy(sp.gameObject, 3f);
-        }
-
-        /// <summary>Pedaços de pedra que saltam do ponto de impacto, quicam no chão e somem.</summary>
-        public static void Debris(MonoBehaviour runner, Vector3 ground, int count, Material rockLook)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                GameObject c = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                c.name = "Estilhaco";
-                Collider col = c.GetComponent<Collider>();
-                if (col != null) Object.Destroy(col);
-                float s = Random.Range(0.08f, 0.26f);
-                c.transform.localScale = new Vector3(s, s * Random.Range(0.6f, 1f), s * Random.Range(0.7f, 1.2f));
-                c.transform.position = ground + Vector3.up * 0.3f;
-                c.transform.rotation = Random.rotation;
-                Renderer r = c.GetComponent<Renderer>();
-                r.sharedMaterial = rockLook != null ? rockLook : RotMaterials.Lit(new Color(0.5f, 0.43f, 0.33f));
-                r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-                Vector2 dir = Random.insideUnitCircle.normalized;
-                Vector3 vel = new Vector3(dir.x, 0f, dir.y) * Random.Range(1.8f, 5.2f) + Vector3.up * Random.Range(2.5f, 6.5f);
-                runner.StartCoroutine(DebrisRoutine(c.transform, vel, ground.y));
-            }
-        }
-
-        static IEnumerator DebrisRoutine(Transform t, Vector3 vel, float floorY)
-        {
-            Vector3 spin = Random.onUnitSphere * Random.Range(180f, 540f);
-            float life = 0f, rest = 0f;
-            while (t != null && life < 2.6f)
-            {
-                float dt = Time.deltaTime;
-                life += dt;
-                vel += Vector3.down * 16f * dt;
-                t.position += vel * dt;
-                t.Rotate(spin * dt, Space.World);
-                if (t.position.y < floorY + 0.06f)
-                {
-                    Vector3 p = t.position;
-                    p.y = floorY + 0.06f;
-                    t.position = p;
-                    vel.y = Mathf.Abs(vel.y) * 0.35f;
-                    vel.x *= 0.6f; vel.z *= 0.6f;
-                    spin *= 0.5f;
-                    if (vel.y < 0.4f) rest += dt;
-                }
-                if (rest > 0.8f) break;
-                yield return null;
-            }
-            if (t != null) Object.Destroy(t.gameObject);
         }
 
         /// <summary>Clarão alaranjado curto (luz de ponto que apaga sozinha).</summary>

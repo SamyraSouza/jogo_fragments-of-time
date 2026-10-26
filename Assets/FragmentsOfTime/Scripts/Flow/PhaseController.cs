@@ -72,6 +72,7 @@ namespace RiftOfTime
             }
             hud.SetFragments(gm.Fragments);
             hud.SetHealth(1f);
+            hud.ShowStatus(true);
             gm.SaveCheckpoint(SceneManager.GetActiveScene().name);
         }
 
@@ -252,22 +253,6 @@ namespace RiftOfTime
         {
             yield return new WaitForSeconds(seconds);
             gm.Reload();
-        }
-
-        void HookGuardian(System.Action<MummyGuardian> onDied)
-        {
-            guardian.Awakened += g =>
-            {
-                hud.ShowBoss(g.displayName, 1f);
-                AudioDirector.Instance.Loop("drums", "drums", 0.6f);
-            };
-            guardian.HealthChanged += hud.SetBoss;
-            guardian.Died += g =>
-            {
-                hud.HideBoss();
-                AudioDirector.Instance.StopLoop("drums");
-                if (onDied != null) onDied(g);
-            };
         }
 
         void PlayPhaseMusic()
@@ -539,7 +524,12 @@ namespace RiftOfTime
             foreach (Light l in FindObjectsByType<Light>(FindObjectsSortMode.None))
                 if (l.type == LightType.Directional) { l.intensity *= 0.06f; l.shadows = LightShadows.None; }     // a 6% de intensidade a sombra do sol não aparece, só custa
             Camera cam = playerT != null ? playerT.GetComponentInChildren<Camera>() : null;
-            if (cam != null) { cam.clearFlags = CameraClearFlags.SolidColor; cam.backgroundColor = Color.black; }
+            if (cam != null)
+            {
+                cam.clearFlags = CameraClearFlags.SolidColor;
+                cam.backgroundColor = Color.black;
+                cam.farClipPlane = Mathf.Min(cam.farClipPlane, 65f);       // com esta névoa, a 65 m sobra ~1% de visibilidade: não desenha o que está além
+            }
         }
 
         /// <summary>Limites invisíveis atrás das paredes laterais e do fundo da sala (x -10..10, z 0..30): o jogador não sai da sala nem se a parede falhar.</summary>
@@ -966,15 +956,6 @@ namespace RiftOfTime
             }
             GameManager.Epilogue = true;
             gm.GoTo(SceneNames.Prologo, Color.black, null, null, 0f, 0.3f);
-        }
-
-        IEnumerator KeepLooking(Vector3 point, System.Func<bool> active)
-        {
-            while (active())
-            {
-                if (fps != null) fps.LookAtPoint(point, Mathf.Clamp01(Time.deltaTime * 4f));
-                yield return null;
-            }
         }
 
         void BeginFinal()
